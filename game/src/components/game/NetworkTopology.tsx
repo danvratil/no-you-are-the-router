@@ -79,6 +79,7 @@ const DeviceNode = ({ node, isPlayer }: { node: NetworkNode; isPlayer: boolean }
           cy={y}
           r={size / 2}
           className={`${style.color} ${style.strokeColor} stroke-2 transition-all hover:scale-110`}
+          style={{ transformOrigin: `${x}px ${y}px` }}
         />
       ) : (
         <rect
@@ -88,6 +89,7 @@ const DeviceNode = ({ node, isPlayer }: { node: NetworkNode; isPlayer: boolean }
           height={size}
           rx={8}
           className={`${style.color} ${style.strokeColor} stroke-2 transition-all hover:scale-110`}
+          style={{ transformOrigin: `${x}px ${y}px` }}
         />
       )}
 
