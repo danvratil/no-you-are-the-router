@@ -96,14 +96,14 @@ export function AutomationPanel() {
                       className="text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300"
                       title={rule.enabled ? 'Disable' : 'Enable'}
                     >
-                      {rule.enabled ? '👁️' : '🚫'}
+                      {rule.enabled ? 'ON' : 'OFF'}
                     </button>
                     <button
                       onClick={() => removeRule(rule.id)}
                       className="text-xs px-2 py-1 rounded bg-red-200 hover:bg-red-300"
                       title="Delete"
                     >
-                      🗑️
+                      ×
                     </button>
                   </div>
                 </div>
@@ -123,7 +123,7 @@ export function AutomationPanel() {
             variant="secondary"
             className="w-full"
           >
-            ➕ Add Rule
+            + Add Rule
           </Button>
         )}
 
@@ -205,7 +205,7 @@ export function AutomationPanel() {
         {/* Tips */}
         {level.maxRecommendedRules && (
           <div className="text-xs text-gray-600 bg-yellow-50 p-2 rounded">
-            💡 Tip: Try to use {level.maxRecommendedRules} or fewer rules for 3 stars!
+            Tip: Try to use {level.maxRecommendedRules} or fewer rules for 3 stars!
           </div>
         )}
       </div>

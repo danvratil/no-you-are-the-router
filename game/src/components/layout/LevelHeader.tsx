@@ -37,7 +37,7 @@ export function LevelHeader() {
                     filled ? 'text-yellow-400' : 'text-gray-300'
                   }`}
                 >
-                  ⭐
+                  ★
                 </span>
               ))}
             </div>
@@ -76,7 +76,7 @@ export function LevelHeader() {
 
             {/* Reset Button */}
             <Button onClick={resetLevel} variant="secondary" size="sm">
-              🔄 Reset
+              Reset
             </Button>
           </div>
         </div>

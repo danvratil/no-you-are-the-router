@@ -19,7 +19,14 @@ import {
   routePacketRouter,
   learnMAC,
   validateDecision,
+  applySourceNAT,
+  applyDestinationNAT,
 } from '../engine/routing';
+import { evaluateRules } from '../engine/automation';
+import { clonePacket } from '../engine/packets';
+
+// Constants
+const AUTO_ADVANCE_DELAY_MS = 2000;
 
 interface GameStore extends GameState {
   // Actions
@@ -132,30 +139,74 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { currentPacket, level, progress } = get();
     if (!currentPacket) return;
 
-    // Get device state
+    // Clone packet for potential modifications (NAT)
+    let workingPacket = clonePacket(currentPacket);
+
+    // Get device state (will be updated immutably later)
     const deviceState = level.playerDevice;
+    let updatedDeviceState = deviceState;
 
-    // Learn MAC if it's a switch
-    if (deviceState.type === DeviceType.SWITCH && currentPacket.ingressPort) {
+    // Learn MAC if it's a switch (immutable update)
+    if (deviceState.type === DeviceType.SWITCH && workingPacket.ingressPort) {
       const updatedTable = learnMAC(
-        currentPacket,
-        currentPacket.ingressPort,
-        deviceState.macTable
+        workingPacket,
+        workingPacket.ingressPort,
+        (deviceState as SwitchState).macTable
       );
-      deviceState.macTable = updatedTable;
+      updatedDeviceState = {
+        ...deviceState,
+        macTable: updatedTable,
+      } as SwitchState;
     }
 
-    // Determine correct decision
+    // Check automation rules if not manual routing
+    let matchedRule: AutomationRule | null = null;
+    if (!manual && level.automationEnabled && progress.rules.length > 0) {
+      const { decision: autoDecision, matchedRule: rule } = evaluateRules(
+        workingPacket,
+        progress.rules,
+        updatedDeviceState as SwitchState | RouterState
+      );
+
+      if (autoDecision && rule) {
+        decision = autoDecision;
+        matchedRule = rule;
+      }
+    }
+
+    // Apply NAT if needed before routing (for outbound packets)
+    if (deviceState.type === DeviceType.ROUTER && decision.applyNAT) {
+      const routerState = updatedDeviceState as RouterState;
+
+      if (decision.natType === 'source' || (!decision.natType && decision.port === 'WAN')) {
+        const natResult = applySourceNAT(workingPacket, routerState);
+        if (natResult) {
+          workingPacket = natResult.packet;
+          // Update NAT table immutably
+          updatedDeviceState = {
+            ...routerState,
+            natTable: [...routerState.natTable, natResult.natEntry],
+          } as RouterState;
+        }
+      } else if (decision.natType === 'destination') {
+        const rewrittenPacket = applyDestinationNAT(workingPacket, routerState);
+        if (rewrittenPacket) {
+          workingPacket = rewrittenPacket;
+        }
+      }
+    }
+
+    // Determine correct decision (using updated device state)
     let correctResult: RoutingResult;
-    if (deviceState.type === DeviceType.SWITCH) {
-      correctResult = routePacketSwitch(currentPacket, deviceState as SwitchState);
+    if (updatedDeviceState.type === DeviceType.SWITCH) {
+      correctResult = routePacketSwitch(workingPacket, updatedDeviceState as SwitchState);
     } else {
-      correctResult = routePacketRouter(currentPacket, deviceState as RouterState);
+      correctResult = routePacketRouter(workingPacket, updatedDeviceState as RouterState);
     }
 
-    // Validate player's decision
+    // Validate player's decision (or automated decision)
     const validation = validateDecision(
-      currentPacket,
+      workingPacket,
       decision,
       correctResult.decision
     );
@@ -165,7 +216,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       packetId: currentPacket.id,
       timestamp: Date.now(),
       manualRouting: manual,
-      ruleUsed: manual ? undefined : 'auto',
+      ruleUsed: matchedRule ? matchedRule.id : undefined,
       decision,
     };
 
@@ -178,6 +229,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
     newScore.accuracy = newScore.correctCount / newScore.totalCount;
 
+    // Update rule match count if automation was used
+    const updatedRules = matchedRule
+      ? progress.rules.map(r =>
+          r.id === matchedRule.id
+            ? { ...r, matchCount: r.matchCount + 1 }
+            : r
+        )
+      : progress.rules;
+
     // Create feedback
     const feedback: RoutingResult = {
       success: validation.correct,
@@ -186,23 +246,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
       correctDecision: correctResult.decision,
     };
 
+    // Update state immutably
     set((state) => ({
       progress: {
         ...state.progress,
         decisions: [...state.progress.decisions, playerDecision],
         score: newScore,
+        rules: updatedRules,
       },
       feedback,
       level: {
         ...state.level,
-        playerDevice: deviceState,
+        playerDevice: updatedDeviceState,
       },
     }));
 
     // Auto-advance after brief delay
     setTimeout(() => {
       get().nextPacket();
-    }, 2000);
+    }, AUTO_ADVANCE_DELAY_MS);
   },
 
   addRule: (rule: AutomationRule) => {

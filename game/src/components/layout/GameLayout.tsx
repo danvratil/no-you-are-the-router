@@ -95,7 +95,7 @@ export function GameLayout() {
         <Modal
           isOpen={true}
           onClose={() => {}}
-          title={completion.passed ? '🎉 Level Complete!' : '❌ Level Failed'}
+          title={completion.passed ? 'Level Complete!' : 'Level Failed'}
           actions={
             <>
               <Button onClick={() => window.location.reload()} variant="secondary">
@@ -119,7 +119,7 @@ export function GameLayout() {
                     i < completion.stars ? 'text-yellow-400' : 'text-gray-300'
                   }`}
                 >
-                  ⭐
+                  ★
                 </span>
               ))}
             </div>
