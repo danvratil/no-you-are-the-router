@@ -40,6 +40,7 @@ interface GameStore extends GameState {
   toggleTutorial: () => void;
   nextTutorialStep: () => void;
   resetLevel: () => void;
+  resetGameState: () => void;
   clearFeedback: () => void;
 }
 
@@ -320,6 +321,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   resetLevel: () => {
     const { level } = get();
     get().startLevel(level.id);
+  },
+
+  resetGameState: () => {
+    set(initialState);
   },
 
   clearFeedback: () => {
