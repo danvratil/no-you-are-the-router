@@ -17,7 +17,7 @@ export function DeviceState() {
   }
 
   return (
-    <Card title="Your State" className="h-full overflow-auto">
+    <Card title="Your State">
       {device.type === DeviceType.SWITCH && <SwitchStateView device={device as SwitchState} />}
       {device.type === DeviceType.ROUTER && <RouterStateView device={device as RouterState} />}
     </Card>
