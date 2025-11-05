@@ -324,7 +324,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   resetGameState: () => {
-    set(initialState);
+    set({ ...initialState });
   },
 
   clearFeedback: () => {
