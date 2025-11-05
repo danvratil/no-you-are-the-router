@@ -35,7 +35,7 @@ export function isPrivateIP(ip: IPv4Address): boolean {
  */
 export function ipToNumber(ip: IPv4Address): number {
   const parts = ip.split('.').map(Number);
-  return (parts[0] << 24) + (parts[1] << 16) + (parts[2] << 8) + parts[3];
+  return ((parts[0] << 24) + (parts[1] << 16) + (parts[2] << 8) + parts[3]) >>> 0;
 }
 
 /**
