@@ -5,7 +5,11 @@
 import { useGameStore } from '../../store/gameStore';
 import { Button } from '../ui/Button';
 
-export function LevelHeader() {
+interface LevelHeaderProps {
+  onBackToLevelSelect: () => void;
+}
+
+export function LevelHeader({ onBackToLevelSelect }: LevelHeaderProps) {
   const { level, progress, resetLevel } = useGameStore();
 
   const accuracy = progress.score.totalCount > 0
@@ -74,10 +78,15 @@ export function LevelHeader() {
               </div>
             )}
 
-            {/* Reset Button */}
-            <Button onClick={resetLevel} variant="secondary" size="sm">
-              Reset
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Button onClick={onBackToLevelSelect} variant="secondary" size="sm">
+                ← Back
+              </Button>
+              <Button onClick={resetLevel} variant="secondary" size="sm">
+                Reset
+              </Button>
+            </div>
           </div>
         </div>
       </div>

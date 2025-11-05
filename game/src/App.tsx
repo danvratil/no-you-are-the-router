@@ -16,6 +16,10 @@ function App() {
     startLevel(levelId);
   };
 
+  const handleBackToLevelSelect = () => {
+    setSelectedLevel(null);
+  };
+
   // Auto-start level 1 for first-time players (optional)
   useEffect(() => {
     // Could check localStorage here to see if this is first visit
@@ -26,7 +30,7 @@ function App() {
     return <LevelSelect onSelectLevel={handleSelectLevel} />;
   }
 
-  return <GameLayout />;
+  return <GameLayout onBackToLevelSelect={handleBackToLevelSelect} />;
 }
 
 export default App;
