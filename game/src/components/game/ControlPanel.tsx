@@ -4,12 +4,12 @@
 
 import { useGameStore } from '../../store/gameStore';
 import { Card } from '../ui/Card';
-import type { RoutingDecision } from '../../types';
+import type { RoutingDecision, SwitchState, RouterState } from '../../types';
 import { DeviceType } from '../../types';
 import { Button } from '../ui/Button';
 
 export function ControlPanel() {
-  const { currentPacket, level, feedback, routePacket } = useGameStore();
+  const { currentPacket, level, feedback, routePacket, progress } = useGameStore();
 
   if (!currentPacket) {
     return (
@@ -24,13 +24,21 @@ export function ControlPanel() {
   const deviceState = level.playerDevice;
   const isSwitch = deviceState.type === DeviceType.SWITCH;
 
-  // Get available ports
+  // Get available ports with proper typing
   const ports = isSwitch
-    ? (deviceState as any).ports || []
-    : Object.keys((deviceState as any).interfaces || {});
+    ? (deviceState as SwitchState).ports || []
+    : Object.keys((deviceState as RouterState).interfaces || {});
 
   const handleRoute = (decision: RoutingDecision) => {
     routePacket(decision, true);
+  };
+
+  const handleAutoRoute = () => {
+    // Trigger automatic routing - rules will be evaluated in gameStore
+    routePacket({
+      action: 'forward', // Placeholder, will be overridden by rules
+      reason: 'Automatic routing',
+    }, false); // false = not manual, use automation
   };
 
   return (
@@ -49,12 +57,31 @@ export function ControlPanel() {
           )}
         </div>
 
-        {/* Routing Options */}
+        {/* Auto-Route Button (if automation enabled) */}
+        {level.automationEnabled && progress.rules.length > 0 && (
+          <div>
+            <Button
+              onClick={handleAutoRoute}
+              variant="success"
+              disabled={!!feedback}
+              className="w-full"
+            >
+              ▶ Auto-Route (Use Rules)
+            </Button>
+            <div className="text-xs text-gray-500 mt-1 text-center">
+              {progress.rules.length} rule{progress.rules.length !== 1 ? 's' : ''} active
+            </div>
+          </div>
+        )}
+
+        {/* Manual Routing Options */}
         <div>
-          <div className="text-sm font-semibold mb-2">Route to:</div>
+          <div className="text-sm font-semibold mb-2">
+            {level.automationEnabled ? 'Manual Route to:' : 'Route to:'}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {/* Port/Interface buttons */}
-            {ports.map((port: any) => {
+            {ports.map((port) => {
               const portId = typeof port === 'string' ? port : port.id;
               const portName = typeof port === 'string' ? port : port.name;
               const isIngress = portId === currentPacket.ingressPort;
@@ -85,9 +112,9 @@ export function ControlPanel() {
                 onClick={() =>
                   handleRoute({
                     action: 'flood',
-                    ports: (deviceState as any).ports
-                      .filter((p: any) => p.id !== currentPacket.ingressPort)
-                      .map((p: any) => p.id),
+                    ports: (deviceState as SwitchState).ports
+                      .filter((p) => p.id !== currentPacket.ingressPort)
+                      .map((p) => p.id),
                     reason: 'Manual flood',
                   })
                 }
@@ -95,7 +122,7 @@ export function ControlPanel() {
                 disabled={!!feedback}
                 className="col-span-2"
               >
-                🌊 Flood All Ports
+                Flood All Ports
               </Button>
             )}
 
@@ -111,7 +138,7 @@ export function ControlPanel() {
               disabled={!!feedback}
               className="col-span-2"
             >
-              ❌ Drop Packet
+              Drop Packet
             </Button>
           </div>
         </div>
@@ -126,7 +153,7 @@ export function ControlPanel() {
             }`}
           >
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">
+              <span className="text-2xl font-bold">
                 {feedback.success ? '✓' : '✗'}
               </span>
               <span className="font-semibold">

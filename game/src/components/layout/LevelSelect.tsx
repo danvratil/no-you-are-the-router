@@ -21,7 +21,7 @@ export function LevelSelect({ onSelectLevel }: LevelSelectProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            No, YOU Are the Router! 🌐
+            No, YOU Are the Router!
           </h1>
           <p className="text-xl text-gray-600">
             Learn networking by becoming the network device
@@ -29,7 +29,7 @@ export function LevelSelect({ onSelectLevel }: LevelSelectProps) {
           <div className="mt-4 flex justify-center gap-6 text-lg">
             <div>
               <span className="font-bold text-purple-600">{progress.totalStars}</span>
-              <span className="text-gray-600"> / 27 ⭐</span>
+              <span className="text-gray-600"> / 27 Stars</span>
             </div>
             <div>
               <span className="font-bold text-blue-600">
@@ -52,7 +52,7 @@ export function LevelSelect({ onSelectLevel }: LevelSelectProps) {
                 {/* Lock Overlay */}
                 {!unlocked && (
                   <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center z-10">
-                    <div className="text-white text-4xl">🔒</div>
+                    <div className="text-white text-2xl font-bold">LOCKED</div>
                   </div>
                 )}
 
@@ -71,7 +71,7 @@ export function LevelSelect({ onSelectLevel }: LevelSelectProps) {
                               i < stars ? 'text-yellow-400' : 'text-gray-300'
                             }`}
                           >
-                            ⭐
+                            ★
                           </span>
                         ))}
                       </div>
@@ -106,7 +106,7 @@ export function LevelSelect({ onSelectLevel }: LevelSelectProps) {
                     className="w-full"
                     variant={completion?.passed ? 'success' : 'primary'}
                   >
-                    {completion?.passed ? '▶️ Replay' : '▶️ Play'}
+                    {completion?.passed ? 'Replay' : 'Play'}
                   </Button>
                 </div>
               </Card>
