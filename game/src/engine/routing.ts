@@ -17,9 +17,8 @@ import {
   isIPInSubnet,
   longestPrefixMatch,
   macEquals,
-  calculate5TupleHash,
 } from '../utils/network';
-import { isBroadcast, isARP } from './packets';
+import { isARP } from './packets';
 
 /**
  * Route a packet through a switch (Layer 2)
@@ -259,8 +258,8 @@ export function applySourceNAT(
     return null;
   }
 
-  const { srcIP, dstIP, protocol } = packet.layer3;
-  const { srcPort, dstPort } = packet.layer4;
+  const { srcIP, protocol } = packet.layer3;
+  const { srcPort } = packet.layer4;
 
   // Generate unique external port
   const existingPorts = routerState.natTable.map((e) => e.externalPort);
@@ -373,7 +372,7 @@ export function checkFirewall(
  * Validate a player's routing decision
  */
 export function validateDecision(
-  packet: Packet,
+  _packet: Packet,
   playerDecision: RoutingDecision,
   correctDecision: RoutingDecision
 ): { correct: boolean; message: string } {

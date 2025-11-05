@@ -61,15 +61,6 @@ const level9RuleBlocks: RuleBlock[] = [
     requiresParams: false,
   },
   {
-    id: 'cond-same-vlan',
-    type: 'condition',
-    conditionType: ConditionType.SAME_VLAN_SUBNET,
-    label: 'If src and dst in same VLAN',
-    description: 'Matches intra-VLAN traffic',
-    availableIn: [9],
-    requiresParams: false,
-  },
-  {
     id: 'action-send-port',
     type: 'action',
     actionType: ActionType.SEND_TO_PORT,
@@ -77,7 +68,6 @@ const level9RuleBlocks: RuleBlock[] = [
     description: 'Forward to specific port',
     availableIn: [9],
     requiresParams: true,
-    paramType: 'port',
   },
   {
     id: 'action-send-trunk',
@@ -110,11 +100,9 @@ const level9: LevelConfig = {
   playerDevice: {
     type: DeviceType.SWITCH,
     name: "Switch-01",
+    ports: [],
     macTable: [],
-    vlans: [
-      { id: 10, name: "Office", subnet: "192.168.10.0/24" },
-      { id: 20, name: "Guest", subnet: "192.168.20.0/24" },
-    ],
+    vlans: [10, 20],
   },
 
   nodes: [
@@ -225,8 +213,11 @@ const level9: LevelConfig = {
       device: {
         type: DeviceType.ROUTER,
         name: "Router",
-        mac: "CC:CC:CC:CC:CC:CC",
-        port: "trunk",
+        interfaces: {},
+        routingTable: [],
+        natTable: [],
+        natEnabled: false,
+        firewallRules: [],
       },
       position: { x: 400, y: 550 },
       label: "Router\n(Inter-VLAN)",

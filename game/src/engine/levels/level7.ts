@@ -47,6 +47,8 @@ const level7: LevelConfig = {
         interfaces: {},
         routingTable: [],
         natTable: [],
+        natEnabled: true,
+        firewallRules: [],
       },
       position: { x: 400, y: 300 },
       label: "YOU\n(Router with NAT)",

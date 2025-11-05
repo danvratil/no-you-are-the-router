@@ -3,14 +3,16 @@
  * Teaching: Routing + NAT automation
  */
 
-import {
+import type {
   LevelConfig,
+  RuleBlock,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
   Protocol,
   ConditionType,
   ActionType,
-  RuleBlock,
 } from '../../types';
 import {
   createL4Packet,
@@ -24,7 +26,7 @@ const level8RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_IP_IN_SUBNET,
     label: 'If dst_ip in 192.168.1.0/24',
     description: 'Matches packets destined for LAN subnet',
-    params: { subnet: '192.168.1.0/24' },
+    paramTemplate: { subnet: '192.168.1.0/24' },
     availableIn: [8],
     requiresParams: false,
   },
@@ -40,7 +42,7 @@ const level8RuleBlocks: RuleBlock[] = [
   {
     id: 'cond-inbound-nat',
     type: 'condition',
-    conditionType: ConditionType.PACKET_IN_NAT_TABLE,
+    conditionType: ConditionType.IN_NAT_TABLE,
     label: 'If packet in NAT table',
     description: 'Matches return traffic with NAT entry',
     availableIn: [8],
@@ -61,7 +63,7 @@ const level8RuleBlocks: RuleBlock[] = [
     actionType: ActionType.SEND_TO_INTERFACE,
     label: 'Send to LAN',
     description: 'Forward to LAN interface',
-    params: { interface: 'lan' },
+    paramTemplate: { interface: 'lan' },
     availableIn: [8],
     requiresParams: false,
   },
@@ -71,7 +73,7 @@ const level8RuleBlocks: RuleBlock[] = [
     actionType: ActionType.ROUTE_AND_NAT,
     label: 'Apply NAT, send to WAN',
     description: 'Perform NAT translation and forward to WAN',
-    params: { interface: 'wan' },
+    paramTemplate: { interface: 'wan' },
     availableIn: [8],
     requiresParams: false,
   },
@@ -81,7 +83,7 @@ const level8RuleBlocks: RuleBlock[] = [
     actionType: ActionType.REVERSE_NAT,
     label: 'Reverse NAT, send to LAN',
     description: 'Reverse NAT translation and forward to LAN',
-    params: { interface: 'lan' },
+    paramTemplate: { interface: 'lan' },
     availableIn: [8],
     requiresParams: false,
   },
@@ -106,19 +108,17 @@ const level8: LevelConfig = {
   playerDevice: {
     type: DeviceType.ROUTER,
     name: "Router-01",
-    ports: [
-      { id: "lan", name: "LAN", type: "access", enabled: true, connectedDevice: "LAN-Switch" },
-      { id: "wan", name: "WAN", type: "access", enabled: true, connectedDevice: "Internet" },
-    ],
-    interfaces: [
-      { id: "lan", name: "LAN", ip: "192.168.1.1", subnet: "192.168.1.0/24", mac: "00:11:22:33:44:55" },
-      { id: "wan", name: "WAN", ip: "203.0.113.1", subnet: "203.0.113.0/24", mac: "AA:BB:CC:DD:EE:00" },
-    ],
+    interfaces: {
+      lan: { ip: "192.168.1.1", subnet: "192.168.1.0/24", mac: "00:11:22:33:44:55", enabled: true },
+      wan: { ip: "203.0.113.1", subnet: "203.0.113.0/24", mac: "AA:BB:CC:DD:EE:00", enabled: true },
+    },
     routingTable: [
       { destination: "192.168.1.0/24", nextHop: "Direct", interface: "lan", metric: 0 },
       { destination: "0.0.0.0/0", nextHop: "203.0.113.254", interface: "wan", metric: 1 },
     ],
     natTable: [],
+    natEnabled: true,
+    firewallRules: [],
   },
 
   nodes: [
@@ -127,10 +127,11 @@ const level8: LevelConfig = {
       device: {
         type: DeviceType.ROUTER,
         name: "YOU (Router)",
-        ports: [],
-        interfaces: [],
+        interfaces: {},
         routingTable: [],
         natTable: [],
+        natEnabled: true,
+        firewallRules: [],
       },
       position: { x: 400, y: 300 },
       label: "YOU\n(Automated Router)",
@@ -185,6 +186,7 @@ const level8: LevelConfig = {
         mac: "11:11:11:11:11:11",
         ip: "8.8.8.8",
         subnet: "8.8.8.0/24",
+        gateway: "0.0.0.0",
         port: "wan",
       },
       position: { x: 650, y: 200 },
@@ -198,6 +200,7 @@ const level8: LevelConfig = {
         mac: "22:22:22:22:22:22",
         ip: "1.1.1.1",
         subnet: "1.1.1.0/24",
+        gateway: "0.0.0.0",
         port: "wan",
       },
       position: { x: 650, y: 400 },
@@ -293,7 +296,6 @@ const level8: LevelConfig = {
         };
       } else {
         // Return traffic
-        const pcIdx = (i - 1) % 3;
         const serverIdx = (i - 1) % 2;
         return {
           ...createL4Packet(
