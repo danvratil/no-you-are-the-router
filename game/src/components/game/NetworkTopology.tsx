@@ -57,12 +57,18 @@ const getDeviceStyle = (type: DeviceType) => {
  * Render a single network node (device)
  */
 const DeviceNode = ({ node, isPlayer }: { node: NetworkNode; isPlayer: boolean }) => {
-  const { device, position, label } = node;
+  const { device, position } = node;
   const style = getDeviceStyle(device.type);
 
   const x = position.x;
   const y = position.y;
   const size = device.type === DeviceType.SWITCH || device.type === DeviceType.ROUTER ? 80 : 60;
+
+  // Extract device information - PC and Server devices have mac and ip
+  const deviceName = device.name;
+  const isGenericDevice = device.type === DeviceType.PC || device.type === DeviceType.SERVER;
+  const mac = isGenericDevice ? device.mac : null;
+  const ip = isGenericDevice ? device.ip : null;
 
   return (
     <g className="device-node" data-device-id={node.id}>
@@ -105,25 +111,37 @@ const DeviceNode = ({ node, isPlayer }: { node: NetworkNode; isPlayer: boolean }
         {style.icon}
       </text>
 
-      {/* Device label */}
+      {/* Device name (bold) */}
       <text
         x={x}
         y={y + size / 2 + 20}
         textAnchor="middle"
-        className="text-sm font-semibold fill-gray-700 select-none pointer-events-none"
+        className="text-sm font-bold fill-gray-800 select-none pointer-events-none"
       >
-        {label}
+        {deviceName}
       </text>
 
-      {/* Additional info for PC/Server */}
-      {(device.type === DeviceType.PC || device.type === DeviceType.SERVER) && 'mac' in device && (
+      {/* MAC address */}
+      {mac && (
         <text
           x={x}
           y={y + size / 2 + 35}
           textAnchor="middle"
-          className="text-xs fill-gray-500 select-none pointer-events-none font-mono"
+          className="text-xs fill-gray-600 select-none pointer-events-none font-mono"
         >
-          {device.mac.slice(0, 8)}...
+          MAC: {mac}
+        </text>
+      )}
+
+      {/* IP address */}
+      {ip && (
+        <text
+          x={x}
+          y={y + size / 2 + (mac ? 50 : 35)}
+          textAnchor="middle"
+          className="text-xs fill-gray-600 select-none pointer-events-none font-mono"
+        >
+          IP: {ip}
         </text>
       )}
     </g>
