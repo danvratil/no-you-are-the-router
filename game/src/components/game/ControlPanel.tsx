@@ -2,10 +2,10 @@
  * Control panel for manual packet routing
  */
 
-import React from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { Card } from '../ui/Card';
-import { DeviceType, RoutingDecision } from '../../types';
+import type { RoutingDecision } from '../../types';
+import { DeviceType } from '../../types';
 import { Button } from '../ui/Button';
 
 export function ControlPanel() {

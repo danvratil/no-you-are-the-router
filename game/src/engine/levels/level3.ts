@@ -3,13 +3,15 @@
  * Teaching: Automation introduction, rule-based forwarding
  */
 
-import {
+import type {
   LevelConfig,
+  RuleBlock,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
   ConditionType,
   ActionType,
-  RuleBlock,
 } from '../../types';
 import {
   createL2Packet,

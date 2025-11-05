@@ -2,7 +2,6 @@
  * Main game layout component
  */
 
-import React from 'react';
 import { LevelHeader } from './LevelHeader';
 import { NetworkTopology } from '../game/NetworkTopology';
 import { PacketInspector } from '../game/PacketInspector';

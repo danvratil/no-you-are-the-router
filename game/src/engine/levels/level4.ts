@@ -3,14 +3,15 @@
  * Teaching: ARP (Address Resolution Protocol), IP→MAC translation
  */
 
-import {
+import type {
   LevelConfig,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
   Protocol,
 } from '../../types';
 import {
-  createL2Packet,
   createARPRequest,
   createARPReply,
   createL3Packet,

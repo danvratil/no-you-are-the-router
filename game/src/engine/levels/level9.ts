@@ -3,14 +3,16 @@
  * Teaching: VLAN tagging, trunk ports, logical isolation
  */
 
-import {
+import type {
   LevelConfig,
+  RuleBlock,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
   Protocol,
   ConditionType,
   ActionType,
-  RuleBlock,
 } from '../../types';
 import {
   createL3Packet,
@@ -24,7 +26,7 @@ const level9RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.VLAN_EQUALS,
     label: 'If VLAN = 10 (Office)',
     description: 'Matches packets in VLAN 10',
-    params: { vlan: 10 },
+    paramTemplate: { vlan: 10 },
     availableIn: [9],
     requiresParams: false,
   },
@@ -34,7 +36,7 @@ const level9RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.VLAN_EQUALS,
     label: 'If VLAN = 20 (Guest)',
     description: 'Matches packets in VLAN 20',
-    params: { vlan: 20 },
+    paramTemplate: { vlan: 20 },
     availableIn: [9],
     requiresParams: false,
   },
@@ -44,7 +46,7 @@ const level9RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_IP_IN_SUBNET,
     label: 'If dst_ip in 192.168.10.0/24',
     description: 'Matches packets destined for VLAN 10 subnet',
-    params: { subnet: '192.168.10.0/24' },
+    paramTemplate: { subnet: '192.168.10.0/24' },
     availableIn: [9],
     requiresParams: false,
   },
@@ -54,7 +56,7 @@ const level9RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_IP_IN_SUBNET,
     label: 'If dst_ip in 192.168.20.0/24',
     description: 'Matches packets destined for VLAN 20 subnet',
-    params: { subnet: '192.168.20.0/24' },
+    paramTemplate: { subnet: '192.168.20.0/24' },
     availableIn: [9],
     requiresParams: false,
   },
@@ -83,7 +85,7 @@ const level9RuleBlocks: RuleBlock[] = [
     actionType: ActionType.SEND_TO_PORT,
     label: 'Send to trunk (router)',
     description: 'Send to router for inter-VLAN routing',
-    params: { port: 'trunk' },
+    paramTemplate: { port: 'trunk' },
     availableIn: [9],
     requiresParams: false,
   },
@@ -108,15 +110,6 @@ const level9: LevelConfig = {
   playerDevice: {
     type: DeviceType.SWITCH,
     name: "Switch-01",
-    ports: [
-      { id: "port1", name: "Port 1", type: "access", vlan: 10, enabled: true, connectedDevice: "PC-Office-A" },
-      { id: "port2", name: "Port 2", type: "access", vlan: 10, enabled: true, connectedDevice: "PC-Office-B" },
-      { id: "port3", name: "Port 3", type: "access", vlan: 10, enabled: true, connectedDevice: "PC-Office-C" },
-      { id: "port4", name: "Port 4", type: "access", vlan: 20, enabled: true, connectedDevice: "PC-Guest-A" },
-      { id: "port5", name: "Port 5", type: "access", vlan: 20, enabled: true, connectedDevice: "PC-Guest-B" },
-      { id: "port6", name: "Port 6", type: "access", vlan: 20, enabled: true, connectedDevice: "PC-Guest-C" },
-      { id: "trunk", name: "Trunk", type: "trunk", enabled: true, connectedDevice: "Router" },
-    ],
     macTable: [],
     vlans: [
       { id: 10, name: "Office", subnet: "192.168.10.0/24" },

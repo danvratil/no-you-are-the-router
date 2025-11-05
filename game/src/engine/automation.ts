@@ -2,19 +2,17 @@
  * Automation rule engine for packet routing
  */
 
-import {
+import type {
   Packet,
   AutomationRule,
   RuleCondition,
   RuleAction,
-  ConditionType,
-  ActionType,
   RoutingDecision,
   RuleEvaluation,
   SwitchState,
   RouterState,
-  DeviceType,
 } from '../types';
+import { ConditionType, ActionType, DeviceType } from '../types';
 import {
   isBroadcastMAC,
   isIPInSubnet,

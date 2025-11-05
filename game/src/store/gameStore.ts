@@ -3,19 +3,16 @@
  */
 
 import { create } from 'zustand';
-import {
+import type {
   GameState,
-  LevelConfig,
-  LevelProgress,
-  Packet,
   RoutingResult,
   RoutingDecision,
   AutomationRule,
   PlayerDecision,
-  DeviceType,
   SwitchState,
   RouterState,
 } from '../types';
+import { DeviceType } from '../types';
 import { getLevel } from '../engine/levels';
 import {
   routePacketSwitch,
@@ -23,8 +20,6 @@ import {
   learnMAC,
   validateDecision,
 } from '../engine/routing';
-import { evaluateRules } from '../engine/automation';
-import { calculateAccuracy, isLevelPassed } from '../engine/scoring';
 
 interface GameStore extends GameState {
   // Actions
@@ -105,7 +100,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   nextPacket: () => {
-    const { progress, packetQueue, level } = get();
+    const { progress, packetQueue } = get();
     const nextIndex = progress.currentPacketIndex + 1;
 
     if (nextIndex >= packetQueue.length) {

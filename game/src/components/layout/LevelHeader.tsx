@@ -2,7 +2,6 @@
  * Level header showing title, progress, and stats
  */
 
-import React from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { Button } from '../ui/Button';
 

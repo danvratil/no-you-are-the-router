@@ -4,7 +4,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GameProgress, LevelCompletion } from '../types';
+import type { GameProgress, LevelCompletion } from '../types';
 
 const STORAGE_KEY = 'no-you-are-the-router-progress';
 const GAME_VERSION = '1.0.0';

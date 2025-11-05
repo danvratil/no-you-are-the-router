@@ -2,11 +2,12 @@
  * Automation panel for building routing rules
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { AutomationRule, ConditionType, ActionType } from '../../types';
+import type { AutomationRule } from '../../types';
+import { ConditionType, ActionType } from '../../types';
 
 export function AutomationPanel() {
   const { level, progress, addRule, removeRule, updateRule } = useGameStore();

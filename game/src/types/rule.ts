@@ -2,7 +2,8 @@
  * Automation rule types for packet routing
  */
 
-import { MACAddress, IPv4Address, Port, Protocol, VLANId } from './packet';
+import type { MACAddress, IPv4Address, Port, VLANId } from './packet';
+import { Protocol } from './packet';
 
 /** Rule condition types */
 export enum ConditionType {

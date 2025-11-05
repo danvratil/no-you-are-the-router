@@ -2,17 +2,13 @@
  * Packet creation, validation, and manipulation
  */
 
-import {
+import type {
   Packet,
   PacketValidation,
   MACAddress,
   IPv4Address,
-  Protocol,
-  Layer2Headers,
-  Layer3Headers,
-  Layer4Headers,
-  ARPData,
 } from '../types';
+import { Protocol } from '../types';
 import { generatePacketId, isValidMAC, isValidIPv4 } from '../utils/network';
 
 /**

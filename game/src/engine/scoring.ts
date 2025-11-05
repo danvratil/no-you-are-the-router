@@ -2,7 +2,7 @@
  * Scoring and star rating calculation
  */
 
-import {
+import type {
   LevelProgress,
   LevelConfig,
   LevelCompletion,

@@ -3,11 +3,9 @@
  * with color-coded layers for educational purposes
  */
 
-import React from 'react';
 import { Card } from '../ui/Card';
 import { useGameStore } from '../../store/gameStore';
 import { getPacketDescription } from '../../engine/packets';
-import { Protocol } from '../../types';
 
 export function PacketInspector() {
   const currentPacket = useGameStore((state) => state.currentPacket);

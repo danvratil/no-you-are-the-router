@@ -2,7 +2,7 @@
  * Core routing logic for switches and routers
  */
 
-import {
+import type {
   Packet,
   RoutingDecision,
   RoutingResult,
@@ -10,7 +10,6 @@ import {
   RouterState,
   MACTableEntry,
   NATTableEntry,
-  DeviceType,
 } from '../types';
 import {
   isBroadcastMAC,

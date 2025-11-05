@@ -2,7 +2,7 @@
  * Main application component
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { GameLayout } from './components/layout/GameLayout';
 import { LevelSelect } from './components/layout/LevelSelect';
 import { useGameStore } from './store/gameStore';
@@ -14,10 +14,6 @@ function App() {
   const handleSelectLevel = (levelId: number) => {
     setSelectedLevel(levelId);
     startLevel(levelId);
-  };
-
-  const handleBackToMenu = () => {
-    setSelectedLevel(null);
   };
 
   // Auto-start level 1 for first-time players (optional)

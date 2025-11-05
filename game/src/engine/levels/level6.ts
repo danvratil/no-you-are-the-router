@@ -3,14 +3,16 @@
  * Teaching: TCP/UDP, port numbers, basic firewall rules
  */
 
-import {
+import type {
   LevelConfig,
+  RuleBlock,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
   Protocol,
   ConditionType,
   ActionType,
-  RuleBlock,
 } from '../../types';
 import {
   createL4Packet,
@@ -24,7 +26,7 @@ const level6RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_IP_IN_SUBNET,
     label: 'If dst_ip in 192.168.1.0/24',
     description: 'Matches packets destined for LAN subnet',
-    params: { subnet: '192.168.1.0/24' },
+    paramTemplate: { subnet: '192.168.1.0/24' },
     availableIn: [6, 7, 8],
     requiresParams: false,
   },
@@ -43,7 +45,7 @@ const level6RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_PORT_EQUALS,
     label: 'If dst_port = 22 (SSH)',
     description: 'Matches SSH traffic',
-    params: { port: 22 },
+    paramTemplate: { port: 22 },
     availableIn: [6, 7, 8],
     requiresParams: false,
   },
@@ -53,7 +55,7 @@ const level6RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_PORT_EQUALS,
     label: 'If dst_port = 80 (HTTP)',
     description: 'Matches HTTP traffic',
-    params: { port: 80 },
+    paramTemplate: { port: 80 },
     availableIn: [6, 7, 8],
     requiresParams: false,
   },
@@ -63,7 +65,7 @@ const level6RuleBlocks: RuleBlock[] = [
     conditionType: ConditionType.DST_PORT_EQUALS,
     label: 'If dst_port = 443 (HTTPS)',
     description: 'Matches HTTPS traffic',
-    params: { port: 443 },
+    paramTemplate: { port: 443 },
     availableIn: [6, 7, 8],
     requiresParams: false,
   },
@@ -73,7 +75,7 @@ const level6RuleBlocks: RuleBlock[] = [
     actionType: ActionType.SEND_TO_INTERFACE,
     label: 'Send to LAN',
     description: 'Forward to LAN interface',
-    params: { interface: 'lan' },
+    paramTemplate: { interface: 'lan' },
     availableIn: [6, 7, 8],
     requiresParams: false,
   },
@@ -83,7 +85,7 @@ const level6RuleBlocks: RuleBlock[] = [
     actionType: ActionType.SEND_TO_INTERFACE,
     label: 'Send to WAN',
     description: 'Forward to WAN interface',
-    params: { interface: 'wan' },
+    paramTemplate: { interface: 'wan' },
     availableIn: [6, 7, 8],
     requiresParams: false,
   },
@@ -108,19 +110,17 @@ const level6: LevelConfig = {
   playerDevice: {
     type: DeviceType.ROUTER,
     name: "Router-01",
-    ports: [
-      { id: "lan", name: "LAN", type: "access", enabled: true, connectedDevice: "LAN-Switch" },
-      { id: "wan", name: "WAN", type: "access", enabled: true, connectedDevice: "Internet" },
-    ],
-    interfaces: [
-      { id: "lan", name: "LAN", ip: "192.168.1.1", subnet: "192.168.1.0/24", mac: "00:11:22:33:44:55" },
-      { id: "wan", name: "WAN", ip: "203.0.113.1", subnet: "203.0.113.0/24", mac: "AA:BB:CC:DD:EE:00" },
-    ],
+    interfaces: {
+      lan: { ip: "192.168.1.1", subnet: "192.168.1.0/24", mac: "00:11:22:33:44:55", enabled: true },
+      wan: { ip: "203.0.113.1", subnet: "203.0.113.0/24", mac: "AA:BB:CC:DD:EE:00", enabled: true },
+    },
     routingTable: [
       { destination: "192.168.1.0/24", nextHop: "Direct", interface: "lan", metric: 0 },
       { destination: "0.0.0.0/0", nextHop: "203.0.113.254", interface: "wan", metric: 1 },
     ],
     firewallRules: [],
+    natTable: [],
+    natEnabled: false,
   },
 
   nodes: [
@@ -129,8 +129,7 @@ const level6: LevelConfig = {
       device: {
         type: DeviceType.ROUTER,
         name: "YOU (Router)",
-        ports: [],
-        interfaces: [],
+        interfaces: {},
         routingTable: [],
       },
       position: { x: 400, y: 300 },
@@ -172,6 +171,7 @@ const level6: LevelConfig = {
         mac: "11:11:11:11:11:11",
         ip: "1.1.1.1",
         subnet: "1.1.1.0/24",
+        gateway: "0.0.0.0",
         port: "wan",
       },
       position: { x: 650, y: 200 },
@@ -185,6 +185,7 @@ const level6: LevelConfig = {
         mac: "66:66:66:66:66:66",
         ip: "203.0.113.66",
         subnet: "203.0.113.0/24",
+        gateway: "0.0.0.0",
         port: "wan",
       },
       position: { x: 650, y: 400 },

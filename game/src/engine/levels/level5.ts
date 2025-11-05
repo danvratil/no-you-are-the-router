@@ -3,8 +3,10 @@
  * Teaching: IP routing, subnets, default gateway
  */
 
-import {
+import type {
   LevelConfig,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
   Protocol,
@@ -23,18 +25,17 @@ const level5: LevelConfig = {
   playerDevice: {
     type: DeviceType.ROUTER,
     name: "Router-01",
-    ports: [
-      { id: "lan", name: "LAN", type: "access", enabled: true, connectedDevice: "LAN-Switch" },
-      { id: "wan", name: "WAN", type: "access", enabled: true, connectedDevice: "Internet" },
-    ],
-    interfaces: [
-      { id: "lan", name: "LAN", ip: "192.168.1.1", subnet: "192.168.1.0/24", mac: "00:11:22:33:44:55" },
-      { id: "wan", name: "WAN", ip: "203.0.113.1", subnet: "203.0.113.0/24", mac: "AA:BB:CC:DD:EE:00" },
-    ],
+    interfaces: {
+      lan: { ip: "192.168.1.1", subnet: "192.168.1.0/24", mac: "00:11:22:33:44:55", enabled: true },
+      wan: { ip: "203.0.113.1", subnet: "203.0.113.0/24", mac: "AA:BB:CC:DD:EE:00", enabled: true },
+    },
     routingTable: [
-      { destination: "192.168.1.0/24", nextHop: "Direct", interface: "lan", metric: 0 },
-      { destination: "0.0.0.0/0", nextHop: "203.0.113.254", interface: "wan", metric: 1 },
+      { destination: "192.168.1.0/24", nextHop: "direct", interface: "lan", metric: 0 },
+      { destination: "0.0.0.0/0", nextHop: "203.0.113.254", interface: "wan", metric: 1, isDefault: true },
     ],
+    natTable: [],
+    natEnabled: false,
+    firewallRules: [],
   },
 
   nodes: [
@@ -43,9 +44,11 @@ const level5: LevelConfig = {
       device: {
         type: DeviceType.ROUTER,
         name: "YOU (Router)",
-        ports: [],
-        interfaces: [],
+        interfaces: {},
         routingTable: [],
+        natTable: [],
+        natEnabled: false,
+        firewallRules: [],
       },
       position: { x: 400, y: 300 },
       label: "YOU\n192.168.1.1 (LAN)\n203.0.113.1 (WAN)",
@@ -100,6 +103,7 @@ const level5: LevelConfig = {
         mac: "88:88:88:88:88:88",
         ip: "8.8.8.8",
         subnet: "8.8.8.0/24",
+        gateway: "8.8.8.1",
         port: "wan",
       },
       position: { x: 650, y: 150 },
@@ -113,6 +117,7 @@ const level5: LevelConfig = {
         mac: "11:11:11:11:11:11",
         ip: "1.1.1.1",
         subnet: "1.1.1.0/24",
+        gateway: "1.1.1.254",
         port: "wan",
       },
       position: { x: 650, y: 300 },
@@ -126,6 +131,7 @@ const level5: LevelConfig = {
         mac: "99:99:99:99:99:99",
         ip: "203.0.113.50",
         subnet: "203.0.113.0/24",
+        gateway: "203.0.113.1",
         port: "wan",
       },
       position: { x: 650, y: 450 },

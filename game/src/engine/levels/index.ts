@@ -12,7 +12,7 @@ import level7 from './level7';
 import level8 from './level8';
 import level9 from './level9';
 
-import { LevelConfig } from '../../types';
+import type { LevelConfig } from '../../types';
 
 export const levels: { [key: number]: LevelConfig } = {
   1: level1,

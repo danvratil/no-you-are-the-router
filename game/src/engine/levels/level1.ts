@@ -3,11 +3,12 @@
  * Teaching: MAC address basics, flooding
  */
 
-import {
+import type {
   LevelConfig,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
-  Protocol,
 } from '../../types';
 import {
   createL2Packet,

@@ -2,7 +2,7 @@
  * Network device types (Switch, Router, etc.)
  */
 
-import { MACAddress, IPv4Address, Port, VLANId } from './packet';
+import type { MACAddress, IPv4Address, Port, VLANId } from './packet';
 
 /** Device types */
 export enum DeviceType {

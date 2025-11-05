@@ -2,7 +2,7 @@
  * Network utility functions for IP calculations, subnet matching, etc.
  */
 
-import { IPv4Address, MACAddress } from '../types';
+import type { IPv4Address, MACAddress } from '../types';
 
 /**
  * Check if a MAC address is a broadcast address

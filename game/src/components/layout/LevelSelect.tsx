@@ -2,7 +2,6 @@
  * Level selection screen
  */
 
-import React from 'react';
 import { useProgressStore } from '../../store/progressStore';
 import { getAllLevels } from '../../engine/levels';
 import { Button } from '../ui/Button';

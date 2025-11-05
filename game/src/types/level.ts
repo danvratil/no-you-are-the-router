@@ -2,9 +2,9 @@
  * Level definition and game state types
  */
 
-import { Packet, RoutingResult } from './packet';
-import { Device, NetworkNode, NetworkConnection } from './device';
-import { AutomationRule, RuleBlock } from './rule';
+import type { Packet, RoutingResult } from './packet';
+import type { Device, NetworkNode, NetworkConnection } from './device';
+import type { AutomationRule, RuleBlock } from './rule';
 
 /** Level difficulty */
 export enum LevelDifficulty {

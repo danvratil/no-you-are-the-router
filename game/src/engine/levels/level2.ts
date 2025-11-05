@@ -3,8 +3,10 @@
  * Teaching: MAC learning, forwarding tables
  */
 
-import {
+import type {
   LevelConfig,
+} from '../../types';
+import {
   LevelDifficulty,
   DeviceType,
 } from '../../types';

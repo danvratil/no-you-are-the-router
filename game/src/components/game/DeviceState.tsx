@@ -3,10 +3,10 @@
  * Shows MAC table for switches, routing/NAT tables for routers
  */
 
-import React from 'react';
 import { Card } from '../ui/Card';
 import { useGameStore } from '../../store/gameStore';
-import { DeviceType, SwitchState, RouterState } from '../../types';
+import type { SwitchState, RouterState } from '../../types';
+import { DeviceType } from '../../types';
 
 export function DeviceState() {
   const level = useGameStore((state) => state.level);
