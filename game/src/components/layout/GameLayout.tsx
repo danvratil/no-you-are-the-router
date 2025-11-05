@@ -14,7 +14,11 @@ import { Button } from '../ui/Button';
 import { generateLevelCompletion } from '../../engine/scoring';
 import { useProgressStore } from '../../store/progressStore';
 
-export function GameLayout() {
+interface GameLayoutProps {
+  onBackToLevelSelect: () => void;
+}
+
+export function GameLayout({ onBackToLevelSelect }: GameLayoutProps) {
   const { level, progress, showTutorial, currentTutorialStep, toggleTutorial, nextTutorialStep } =
     useGameStore();
   const { saveCompletion } = useProgressStore();
@@ -45,7 +49,7 @@ export function GameLayout() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <LevelHeader />
+      <LevelHeader onBackToLevelSelect={onBackToLevelSelect} />
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
