@@ -4,7 +4,7 @@
 
 import { useGameStore } from '../../store/gameStore';
 import { Card } from '../ui/Card';
-import type { RoutingDecision, SwitchState, RouterState } from '../../types';
+import type { RoutingDecision, SwitchState, RouterState, DevicePort } from '../../types';
 import { DeviceType } from '../../types';
 import { Button } from '../ui/Button';
 
@@ -81,7 +81,7 @@ export function ControlPanel() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {/* Port/Interface buttons */}
-            {ports.map((port) => {
+            {ports.map((port: DevicePort | string) => {
               const portId = typeof port === 'string' ? port : port.id;
               const portName = typeof port === 'string' ? port : port.name;
               const isIngress = portId === currentPacket.ingressPort;
@@ -113,8 +113,8 @@ export function ControlPanel() {
                   handleRoute({
                     action: 'flood',
                     ports: (deviceState as SwitchState).ports
-                      .filter((p) => p.id !== currentPacket.ingressPort)
-                      .map((p) => p.id),
+                      .filter((p: DevicePort) => p.id !== currentPacket.ingressPort)
+                      .map((p: DevicePort) => p.id),
                     reason: 'Manual flood',
                   })
                 }

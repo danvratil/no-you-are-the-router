@@ -114,13 +114,14 @@ export function evaluateCondition(
       );
 
     // Direction
-    case ConditionType.DIRECTION:
+    case ConditionType.DIRECTION: {
       // Simplified direction detection
       if (!condition.params.direction || !packet.layer3) return false;
       const isPrivate = isPrivateIP(packet.layer3.srcIP);
       if (condition.params.direction === 'outbound') return isPrivate;
       if (condition.params.direction === 'inbound') return !isPrivate;
       return false;
+    }
 
     default:
       return false;
@@ -152,7 +153,7 @@ export function executeAction(
         reason: `Rule: ${action.label}`,
       };
 
-    case ActionType.SEND_TO_LEARNED_PORT:
+    case ActionType.SEND_TO_LEARNED_PORT: {
       if (deviceState.type !== DeviceType.SWITCH) return null;
       const macEntry = deviceState.macTable.find((entry) =>
         macEquals(entry.mac, packet.layer2.dstMAC)
@@ -163,8 +164,9 @@ export function executeAction(
         port: macEntry.port,
         reason: 'Rule: Send to learned port',
       };
+    }
 
-    case ActionType.FLOOD_ALL_PORTS:
+    case ActionType.FLOOD_ALL_PORTS: {
       const ports =
         deviceState.type === DeviceType.SWITCH
           ? deviceState.ports
@@ -177,6 +179,7 @@ export function executeAction(
         ports,
         reason: 'Rule: Flood all ports',
       };
+    }
 
     case ActionType.DROP_PACKET:
       return {
