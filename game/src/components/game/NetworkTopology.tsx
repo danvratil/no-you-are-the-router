@@ -64,12 +64,11 @@ const DeviceNode = ({ node, isPlayer }: { node: NetworkNode; isPlayer: boolean }
   const y = position.y;
   const size = device.type === DeviceType.SWITCH || device.type === DeviceType.ROUTER ? 80 : 60;
 
-  // Extract device information
+  // Extract device information - PC and Server devices have mac and ip
   const deviceName = device.name;
-  const hasMac = 'mac' in device;
-  const hasIp = 'ip' in device;
-  const mac = hasMac ? (device as any).mac : null;
-  const ip = hasIp ? (device as any).ip : null;
+  const isGenericDevice = device.type === DeviceType.PC || device.type === DeviceType.SERVER;
+  const mac = isGenericDevice ? device.mac : null;
+  const ip = isGenericDevice ? device.ip : null;
 
   return (
     <g className="device-node" data-device-id={node.id}>
