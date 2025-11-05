@@ -12,7 +12,7 @@ export function PacketInspector() {
 
   if (!currentPacket) {
     return (
-      <Card title="Packet Inspector" className="h-full">
+      <Card title="Packet Inspector">
         <div className="flex items-center justify-center h-48 text-gray-400">
           <p>No packet available</p>
         </div>
@@ -23,7 +23,7 @@ export function PacketInspector() {
   const description = getPacketDescription(currentPacket);
 
   return (
-    <Card title="Packet Inspector" className="h-full">
+    <Card title="Packet Inspector">
       <div className="space-y-4">
         {/* Packet Description */}
         <div className="bg-gray-50 rounded p-3">

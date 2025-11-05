@@ -13,7 +13,7 @@ export function ControlPanel() {
 
   if (!currentPacket) {
     return (
-      <Card title="Control Panel" className="h-full">
+      <Card title="Control Panel">
         <div className="text-center text-gray-500 py-8">
           No packet to route
         </div>
@@ -42,7 +42,7 @@ export function ControlPanel() {
   };
 
   return (
-    <Card title="Control Panel" className="h-full">
+    <Card title="Control Panel">
       <div className="space-y-4">
         {/* Current Packet Display */}
         <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3">
