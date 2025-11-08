@@ -52,21 +52,26 @@ export function GameLayout({ onBackToLevelSelect }: GameLayoutProps) {
       <LevelHeader onBackToLevelSelect={onBackToLevelSelect} />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full max-w-7xl mx-auto p-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
-            {/* Left Column - Topology */}
-            <div className="lg:col-span-2 space-y-4 overflow-auto">
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 max-w-7xl mx-auto p-4 w-full overflow-hidden flex flex-col">
+          {/* Top Section: Topology + Side Panels */}
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-hidden mb-4">
+            {/* Left: Network Topology */}
+            <div className="flex flex-col overflow-auto">
               <NetworkTopology />
             </div>
 
-            {/* Right Column - Controls and Info */}
-            <div className="space-y-4 overflow-auto">
+            {/* Right: Packet Inspector + Device State */}
+            <div className="flex flex-col gap-4 overflow-auto">
               <PacketInspector />
               <DeviceState />
-              <ControlPanel />
-              {level.automationEnabled && <AutomationPanel />}
             </div>
+          </div>
+
+          {/* Bottom Section: Control Panel */}
+          <div className="flex flex-col gap-4 overflow-auto max-h-[30vh]">
+            <ControlPanel />
+            {level.automationEnabled && <AutomationPanel />}
           </div>
         </div>
       </div>
