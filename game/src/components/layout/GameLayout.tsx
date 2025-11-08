@@ -69,7 +69,7 @@ export function GameLayout({ onBackToLevelSelect }: GameLayoutProps) {
           </div>
 
           {/* Bottom Section: Control Panel */}
-          <div className="flex flex-col gap-4 overflow-auto" style={{ maxHeight: '30vh' }}>
+          <div className="flex flex-col gap-4 overflow-auto max-h-[30vh]">
             <ControlPanel />
             {level.automationEnabled && <AutomationPanel />}
           </div>
