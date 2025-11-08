@@ -11,6 +11,8 @@ import type {
   PlayerDecision,
   SwitchState,
   RouterState,
+  TutorialStep,
+  Packet,
 } from '../types';
 import { DeviceType } from '../types';
 import { getLevel } from '../engine/levels';
@@ -27,6 +29,47 @@ import { clonePacket } from '../engine/packets';
 
 // Constants
 const AUTO_ADVANCE_DELAY_MS = 2000;
+
+/**
+ * Helper function to check if a tutorial should be shown for the current state
+ */
+function shouldShowTutorial(
+  tutorial: TutorialStep,
+  packet: Packet | null,
+  packetIndex: number
+): boolean {
+  // Already shown
+  if (tutorial.shown) return false;
+
+  const { trigger } = tutorial;
+
+  switch (trigger.type) {
+    case 'start':
+      // Show at the very beginning
+      return packetIndex === 0 && packet !== null;
+
+    case 'packetIndex':
+      // Show when we reach a specific packet index
+      return packetIndex === trigger.index;
+
+    case 'packetCondition':
+      // Show when packet matches a condition
+      if (!packet) return false;
+      try {
+        return trigger.condition(packet);
+      } catch (error) {
+        console.error('Error evaluating tutorial condition:', error);
+        return false;
+      }
+
+    case 'manual':
+      // Never show automatically
+      return false;
+
+    default:
+      return false;
+  }
+}
 
 interface GameStore extends GameState {
   // Actions
@@ -80,8 +123,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const packetQueue = [...level.packets];
     const currentPacket = packetQueue[0] || null;
 
+    // Initialize tutorial state (mark all as not shown)
+    const tutorialWithState = level.tutorial.map(t => ({ ...t, shown: false }));
+
+    // Check for 'start' trigger tutorials
+    const startTutorialIndex = tutorialWithState.findIndex(
+      t => t.trigger.type === 'start'
+    );
+
+    const shouldShowTutorial = startTutorialIndex >= 0;
+
     set({
-      level,
+      level: {
+        ...level,
+        tutorial: tutorialWithState,
+      },
       progress: {
         levelId,
         started: true,
@@ -101,14 +157,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentPacket,
       packetQueue,
       feedback: null,
-      showTutorial: level.tutorial.length > 0,
-      currentTutorialStep: 0,
+      showTutorial: shouldShowTutorial,
+      currentTutorialStep: shouldShowTutorial ? startTutorialIndex : 0,
       paused: false,
     });
   },
 
   nextPacket: () => {
-    const { progress, packetQueue } = get();
+    const { progress, packetQueue, level } = get();
     const nextIndex = progress.currentPacketIndex + 1;
 
     if (nextIndex >= packetQueue.length) {
@@ -126,13 +182,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const nextPacket = packetQueue[nextIndex];
 
+    // Check if any tutorial should be triggered for this packet
+    const tutorialToShow = level.tutorial.findIndex((tutorial) =>
+      shouldShowTutorial(tutorial, nextPacket, nextIndex)
+    );
+
+    // Mark the triggered tutorial as shown
+    let updatedTutorials = level.tutorial;
+    if (tutorialToShow >= 0) {
+      updatedTutorials = level.tutorial.map((t, i) =>
+        i === tutorialToShow ? { ...t, shown: true } : t
+      );
+    }
+
     set({
+      level: {
+        ...level,
+        tutorial: updatedTutorials,
+      },
       progress: {
         ...progress,
         currentPacketIndex: nextIndex,
       },
       currentPacket: nextPacket,
       feedback: null,
+      showTutorial: tutorialToShow >= 0,
+      currentTutorialStep: tutorialToShow >= 0 ? tutorialToShow : 0,
     });
   },
 
@@ -307,15 +382,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   toggleTutorial: () => {
-    set((state) => ({
-      showTutorial: !state.showTutorial,
-    }));
+    set((state) => {
+      // Mark current tutorial as shown when dismissed
+      const updatedTutorials = state.level.tutorial.map((t, i) =>
+        i === state.currentTutorialStep ? { ...t, shown: true } : t
+      );
+
+      return {
+        showTutorial: false,
+        level: {
+          ...state.level,
+          tutorial: updatedTutorials,
+        },
+      };
+    });
   },
 
   nextTutorialStep: () => {
-    set((state) => ({
-      currentTutorialStep: state.currentTutorialStep + 1,
-    }));
+    set((state) => {
+      // Mark current tutorial as shown
+      const updatedTutorials = state.level.tutorial.map((t, i) =>
+        i === state.currentTutorialStep ? { ...t, shown: true } : t
+      );
+
+      return {
+        currentTutorialStep: state.currentTutorialStep + 1,
+        level: {
+          ...state.level,
+          tutorial: updatedTutorials,
+        },
+      };
+    });
   },
 
   resetLevel: () => {

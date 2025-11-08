@@ -121,28 +121,40 @@ const level1: LevelConfig = {
       id: "intro",
       title: "Welcome to Level 1!",
       content: "You're a 4-port Ethernet switch. Your job is simple: forward packets to the right destination by matching MAC addresses. Every device has a unique MAC address like AA:BB:CC:DD:EE:FF.",
-      packetIndex: 0,
+      trigger: { type: 'start' },
       requiresAction: false,
     },
     {
       id: "first-packet",
       title: "First Packet",
       content: "This packet is for PC-A (MAC: AA:BB:CC:DD:EE:FF). Since you already know PC-A is on Port 1, drag the packet to Port 1.",
-      packetIndex: 0,
+      trigger: { type: 'packetIndex', index: 0 },
       requiresAction: true,
     },
     {
       id: "broadcast",
       title: "Broadcast Packets",
-      content: "This is a broadcast (destination: FF:FF:FF:FF:FF:FF). Broadcasts must go to ALL ports. Drag it to 'Flood All Ports'.",
-      packetIndex: 1,
+      content: "This is a broadcast (destination: FF:FF:FF:FF:FF:FF). Broadcasts must go to ALL ports. Click the 'Flood All Ports' button to send it everywhere.",
+      trigger: {
+        type: 'packetCondition',
+        condition: (packet) => packet.dst_mac === 'FF:FF:FF:FF:FF:FF'
+      },
       requiresAction: true,
     },
     {
       id: "unknown",
       title: "Unknown Destination",
       content: "You don't know where this MAC address is yet. When you don't know, you must flood it to all ports to find the destination.",
-      packetIndex: 2,
+      trigger: {
+        type: 'packetCondition',
+        condition: (packet) => {
+          // Show when destination MAC is not in the pre-populated table
+          // Pre-populated: AA:BB:CC:DD:EE:FF
+          // Not broadcast: FF:FF:FF:FF:FF:FF
+          const knownMacs = ['AA:BB:CC:DD:EE:FF', 'FF:FF:FF:FF:FF:FF'];
+          return !knownMacs.includes(packet.dst_mac);
+        }
+      },
       requiresAction: true,
     },
   ],
