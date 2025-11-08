@@ -195,15 +195,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const nextPacket = packetQueue[nextIndex];
 
     // Check if any tutorial should be triggered for this packet
-    // Optimize: find and mark in a single pass
+    // Do NOT mark as shown yet - only when user dismisses it
     let tutorialToShow = -1;
-    const updatedTutorialsShown = new Set(progress.tutorialsShown);
 
     for (let i = 0; i < level.tutorial.length; i++) {
       const tutorial = level.tutorial[i];
       if (shouldShowTutorial(tutorial, nextPacket, nextIndex, progress.tutorialsShown)) {
         tutorialToShow = i;
-        updatedTutorialsShown.add(tutorial.id);
         break; // Show only one tutorial at a time
       }
     }
@@ -212,7 +210,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       progress: {
         ...progress,
         currentPacketIndex: nextIndex,
-        tutorialsShown: updatedTutorialsShown,
       },
       currentPacket: nextPacket,
       feedback: null,
@@ -411,18 +408,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   nextTutorialStep: () => {
     set((state) => {
-      // Bounds checking: ensure we don't exceed tutorial array length
-      const nextStep = state.currentTutorialStep + 1;
-      if (nextStep >= state.level.tutorial.length) {
-        // No more tutorials, just close
-        return { showTutorial: false };
-      }
-
-      // Mark current tutorial as shown
+      // Mark current tutorial as shown first
       const currentTutorial = state.level.tutorial[state.currentTutorialStep];
       const updatedTutorialsShown = currentTutorial
         ? markTutorialShown(state.progress.tutorialsShown, currentTutorial.id)
         : state.progress.tutorialsShown;
+
+      // Bounds checking: ensure we don't exceed tutorial array length
+      const nextStep = state.currentTutorialStep + 1;
+      if (nextStep >= state.level.tutorial.length) {
+        // No more tutorials, close modal after marking current as shown
+        return {
+          showTutorial: false,
+          progress: {
+            ...state.progress,
+            tutorialsShown: updatedTutorialsShown,
+          },
+        };
+      }
 
       return {
         currentTutorialStep: nextStep,
