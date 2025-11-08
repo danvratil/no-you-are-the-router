@@ -265,7 +265,7 @@ export const NetworkTopology = () => {
   }, [nodes, level.playerDevice]);
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-300 overflow-hidden">
+    <div className="relative w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-300 overflow-hidden">
       <svg
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
         className="w-full h-full"
