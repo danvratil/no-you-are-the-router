@@ -28,7 +28,6 @@ export interface TutorialStep {
   highlightElement?: string; // CSS selector
   trigger: TutorialTrigger; // When to show this tutorial
   requiresAction?: boolean; // Wait for user action
-  shown?: boolean; // Track if already shown (runtime state)
 }
 
 /** Level objectives */
@@ -109,6 +108,7 @@ export interface LevelProgress {
     accuracy: number;
   };
   rules: AutomationRule[];
+  tutorialsShown: Set<string>; // Tutorial IDs that have been shown
   timeStarted?: number;
   timeCompleted?: number;
   stars: number; // 0-3

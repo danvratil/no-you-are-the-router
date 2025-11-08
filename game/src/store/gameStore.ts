@@ -36,10 +36,11 @@ const AUTO_ADVANCE_DELAY_MS = 2000;
 function shouldShowTutorial(
   tutorial: TutorialStep,
   packet: Packet | null,
-  packetIndex: number
+  packetIndex: number,
+  tutorialsShown: Set<string>
 ): boolean {
-  // Already shown
-  if (tutorial.shown) return false;
+  // Already shown - check runtime state
+  if (tutorialsShown.has(tutorial.id)) return false;
 
   const { trigger } = tutorial;
 
@@ -69,6 +70,18 @@ function shouldShowTutorial(
     default:
       return false;
   }
+}
+
+/**
+ * Helper function to mark a tutorial as shown (DRY principle)
+ */
+function markTutorialShown(
+  tutorialsShown: Set<string>,
+  tutorialId: string
+): Set<string> {
+  const updated = new Set(tutorialsShown);
+  updated.add(tutorialId);
+  return updated;
 }
 
 interface GameStore extends GameState {
@@ -102,6 +115,7 @@ const initialState: GameState = {
       accuracy: 0,
     },
     rules: [],
+    tutorialsShown: new Set<string>(),
     stars: 0,
   },
   currentPacket: null,
@@ -123,21 +137,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const packetQueue = [...level.packets];
     const currentPacket = packetQueue[0] || null;
 
-    // Initialize tutorial state (mark all as not shown)
-    const tutorialWithState = level.tutorial.map(t => ({ ...t, shown: false }));
+    // Initialize tutorial tracking - no tutorials shown yet
+    const tutorialsShown = new Set<string>();
 
     // Check for 'start' trigger tutorials
-    const startTutorialIndex = tutorialWithState.findIndex(
+    const startTutorialIndex = level.tutorial.findIndex(
       t => t.trigger.type === 'start'
     );
 
     const shouldShowTutorial = startTutorialIndex >= 0;
 
     set({
-      level: {
-        ...level,
-        tutorial: tutorialWithState,
-      },
+      level,
       progress: {
         levelId,
         started: true,
@@ -151,6 +162,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           accuracy: 0,
         },
         rules: [],
+        tutorialsShown,
         timeStarted: Date.now(),
         stars: 0,
       },
@@ -183,26 +195,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const nextPacket = packetQueue[nextIndex];
 
     // Check if any tutorial should be triggered for this packet
-    const tutorialToShow = level.tutorial.findIndex((tutorial) =>
-      shouldShowTutorial(tutorial, nextPacket, nextIndex)
-    );
+    // Optimize: find and mark in a single pass
+    let tutorialToShow = -1;
+    const updatedTutorialsShown = new Set(progress.tutorialsShown);
 
-    // Mark the triggered tutorial as shown
-    let updatedTutorials = level.tutorial;
-    if (tutorialToShow >= 0) {
-      updatedTutorials = level.tutorial.map((t, i) =>
-        i === tutorialToShow ? { ...t, shown: true } : t
-      );
+    for (let i = 0; i < level.tutorial.length; i++) {
+      const tutorial = level.tutorial[i];
+      if (shouldShowTutorial(tutorial, nextPacket, nextIndex, progress.tutorialsShown)) {
+        tutorialToShow = i;
+        updatedTutorialsShown.add(tutorial.id);
+        break; // Show only one tutorial at a time
+      }
     }
 
     set({
-      level: {
-        ...level,
-        tutorial: updatedTutorials,
-      },
       progress: {
         ...progress,
         currentPacketIndex: nextIndex,
+        tutorialsShown: updatedTutorialsShown,
       },
       currentPacket: nextPacket,
       feedback: null,
@@ -384,15 +394,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   toggleTutorial: () => {
     set((state) => {
       // Mark current tutorial as shown when dismissed
-      const updatedTutorials = state.level.tutorial.map((t, i) =>
-        i === state.currentTutorialStep ? { ...t, shown: true } : t
-      );
+      const currentTutorial = state.level.tutorial[state.currentTutorialStep];
+      const updatedTutorialsShown = currentTutorial
+        ? markTutorialShown(state.progress.tutorialsShown, currentTutorial.id)
+        : state.progress.tutorialsShown;
 
       return {
         showTutorial: false,
-        level: {
-          ...state.level,
-          tutorial: updatedTutorials,
+        progress: {
+          ...state.progress,
+          tutorialsShown: updatedTutorialsShown,
         },
       };
     });
@@ -400,16 +411,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   nextTutorialStep: () => {
     set((state) => {
+      // Bounds checking: ensure we don't exceed tutorial array length
+      const nextStep = state.currentTutorialStep + 1;
+      if (nextStep >= state.level.tutorial.length) {
+        // No more tutorials, just close
+        return { showTutorial: false };
+      }
+
       // Mark current tutorial as shown
-      const updatedTutorials = state.level.tutorial.map((t, i) =>
-        i === state.currentTutorialStep ? { ...t, shown: true } : t
-      );
+      const currentTutorial = state.level.tutorial[state.currentTutorialStep];
+      const updatedTutorialsShown = currentTutorial
+        ? markTutorialShown(state.progress.tutorialsShown, currentTutorial.id)
+        : state.progress.tutorialsShown;
 
       return {
-        currentTutorialStep: state.currentTutorialStep + 1,
-        level: {
-          ...state.level,
-          tutorial: updatedTutorials,
+        currentTutorialStep: nextStep,
+        progress: {
+          ...state.progress,
+          tutorialsShown: updatedTutorialsShown,
         },
       };
     });

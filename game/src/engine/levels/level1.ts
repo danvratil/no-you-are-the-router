@@ -127,7 +127,7 @@ const level1: LevelConfig = {
     {
       id: "first-packet",
       title: "First Packet",
-      content: "This packet is for PC-A (MAC: AA:BB:CC:DD:EE:FF). Since you already know PC-A is on Port 1, drag the packet to Port 1.",
+      content: "This packet is for PC-A (MAC: AA:BB:CC:DD:EE:FF). Since you already know PC-A is on Port 1, click the 'Port 1' button to send it there.",
       trigger: { type: 'packetIndex', index: 0 },
       requiresAction: true,
     },
