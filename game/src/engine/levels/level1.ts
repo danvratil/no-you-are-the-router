@@ -137,7 +137,7 @@ const level1: LevelConfig = {
       content: "This is a broadcast (destination: FF:FF:FF:FF:FF:FF). Broadcasts must go to ALL ports. Click the 'Flood All Ports' button to send it everywhere.",
       trigger: {
         type: 'packetCondition',
-        condition: (packet) => packet.dst_mac === 'FF:FF:FF:FF:FF:FF'
+        condition: (packet) => packet.layer2.dstMAC === 'FF:FF:FF:FF:FF:FF'
       },
       requiresAction: true,
     },
@@ -152,7 +152,7 @@ const level1: LevelConfig = {
           // Pre-populated: AA:BB:CC:DD:EE:FF
           // Not broadcast: FF:FF:FF:FF:FF:FF
           const knownMacs = ['AA:BB:CC:DD:EE:FF', 'FF:FF:FF:FF:FF:FF'];
-          return !knownMacs.includes(packet.dst_mac);
+          return !knownMacs.includes(packet.layer2.dstMAC);
         }
       },
       requiresAction: true,

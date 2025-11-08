@@ -161,21 +161,21 @@ const level3: LevelConfig = {
       id: "intro",
       title: "Time to Automate!",
       content: "Manually routing every packet is tedious and real switches handle thousands per second. Let's build automation rules!",
-      packetIndex: 5, // After first 5 packets
+      trigger: { type: 'packetIndex', index: 5 }, // After first 5 packets
       requiresAction: false,
     },
     {
       id: "rule1",
       title: "Create Your First Rule",
       content: "Create a rule: 'If dst_mac in learned table' → 'Send to learned port'. This handles most packets automatically!",
-      packetIndex: 5,
+      trigger: { type: 'packetIndex', index: 5 },
       requiresAction: true,
     },
     {
       id: "rule2",
       title: "Handle Broadcasts",
       content: "Now add a rule for broadcasts: 'If dst_mac = FF:FF:FF:FF:FF:FF' → 'Flood all ports'",
-      packetIndex: 5,
+      trigger: { type: 'packetIndex', index: 5 },
       requiresAction: true,
     },
   ],
