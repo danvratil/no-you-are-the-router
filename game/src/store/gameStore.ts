@@ -46,8 +46,8 @@ function shouldShowTutorial(
 
   switch (trigger.type) {
     case 'start':
-      // Show at the very beginning
-      return packetIndex === 0 && packet !== null;
+      // Show at the very beginning, regardless of packet state
+      return packetIndex === 0;
 
     case 'packetIndex':
       // Show when we reach a specific packet index
@@ -140,12 +140,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Initialize tutorial tracking - no tutorials shown yet
     const tutorialsShown = new Set<string>();
 
-    // Check for 'start' trigger tutorials
+    // Check for tutorials that should be shown at level start (packetIndex: 0)
+    // This includes both 'start' triggers and 'packetIndex: 0' triggers
     const startTutorialIndex = level.tutorial.findIndex(
-      t => t.trigger.type === 'start'
+      t => shouldShowTutorial(t, currentPacket, 0, tutorialsShown)
     );
 
-    const shouldShowTutorial = startTutorialIndex >= 0;
+    const showTutorialAtStart = startTutorialIndex >= 0;
 
     set({
       level,
@@ -169,8 +170,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentPacket,
       packetQueue,
       feedback: null,
-      showTutorial: shouldShowTutorial,
-      currentTutorialStep: shouldShowTutorial ? startTutorialIndex : 0,
+      showTutorial: showTutorialAtStart,
+      currentTutorialStep: showTutorialAtStart ? startTutorialIndex : 0,
       paused: false,
     });
   },
