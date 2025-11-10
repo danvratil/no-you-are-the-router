@@ -13,13 +13,20 @@ export enum LevelDifficulty {
   ADVANCED = 'advanced',
 }
 
+/** Tutorial trigger conditions */
+export type TutorialTrigger =
+  | { type: 'start' } // Show at level start
+  | { type: 'packetIndex'; index: number } // Show before specific packet index
+  | { type: 'packetCondition'; condition: (packet: Packet) => boolean } // Show when packet matches condition
+  | { type: 'manual' }; // Show manually when requested
+
 /** Tutorial step */
 export interface TutorialStep {
   id: string;
   title: string;
   content: string;
   highlightElement?: string; // CSS selector
-  packetIndex?: number; // Show tutorial before this packet
+  trigger: TutorialTrigger; // When to show this tutorial
   requiresAction?: boolean; // Wait for user action
 }
 
@@ -101,6 +108,7 @@ export interface LevelProgress {
     accuracy: number;
   };
   rules: AutomationRule[];
+  tutorialsShown: Set<string>; // Tutorial IDs that have been shown
   timeStarted?: number;
   timeCompleted?: number;
   stars: number; // 0-3

@@ -15,6 +15,11 @@ import {
   createBroadcastPacket,
 } from '../packets';
 
+// Pre-populated MAC addresses known by the switch at level start
+// Used in both macTable initialization and tutorial conditions
+const PRE_POPULATED_MACS = ['AA:BB:CC:DD:EE:FF'];
+const BROADCAST_MAC = 'FF:FF:FF:FF:FF:FF';
+
 const level1: LevelConfig = {
   id: 1,
   title: "You Are A Switch",
@@ -32,8 +37,8 @@ const level1: LevelConfig = {
       { id: "port4", name: "Port 4", type: "access", enabled: true, connectedDevice: "PC-D" },
     ],
     macTable: [
-      // Pre-populated with one entry
-      { mac: "AA:BB:CC:DD:EE:FF", port: "port1", timestamp: Date.now(), learned: false },
+      // Pre-populated with one entry (using constant defined above)
+      { mac: PRE_POPULATED_MACS[0], port: "port1", timestamp: Date.now(), learned: false },
     ],
     vlans: [],
   },
@@ -56,14 +61,14 @@ const level1: LevelConfig = {
       device: {
         type: DeviceType.PC,
         name: "PC-A",
-        mac: "AA:BB:CC:DD:EE:FF",
+        mac: PRE_POPULATED_MACS[0],
         ip: "192.168.1.10",
         subnet: "192.168.1.0/24",
         gateway: "192.168.1.1",
         port: "port1",
       },
       position: { x: 200, y: 150 },
-      label: "PC-A\nAA:BB:CC:DD:EE:FF",
+      label: `PC-A\n${PRE_POPULATED_MACS[0]}`,
     },
     {
       id: "pc-b",
@@ -121,28 +126,39 @@ const level1: LevelConfig = {
       id: "intro",
       title: "Welcome to Level 1!",
       content: "You're a 4-port Ethernet switch. Your job is simple: forward packets to the right destination by matching MAC addresses. Every device has a unique MAC address like AA:BB:CC:DD:EE:FF.",
-      packetIndex: 0,
+      trigger: { type: 'start' },
       requiresAction: false,
     },
     {
       id: "first-packet",
       title: "First Packet",
-      content: "This packet is for PC-A (MAC: AA:BB:CC:DD:EE:FF). Since you already know PC-A is on Port 1, drag the packet to Port 1.",
-      packetIndex: 0,
+      content: `This packet is for PC-A (MAC: ${PRE_POPULATED_MACS[0]}). Since you already know PC-A is on Port 1, click the 'Port 1' button to send it there.`,
+      trigger: { type: 'packetIndex', index: 0 },
       requiresAction: true,
     },
     {
       id: "broadcast",
       title: "Broadcast Packets",
-      content: "This is a broadcast (destination: FF:FF:FF:FF:FF:FF). Broadcasts must go to ALL ports. Drag it to 'Flood All Ports'.",
-      packetIndex: 1,
+      content: `This is a broadcast (destination: ${BROADCAST_MAC}). Broadcasts must go to ALL ports. Click the 'Flood All Ports' button to send it everywhere.`,
+      trigger: {
+        type: 'packetCondition',
+        condition: (packet) => packet.layer2.dstMAC === BROADCAST_MAC
+      },
       requiresAction: true,
     },
     {
       id: "unknown",
       title: "Unknown Destination",
       content: "You don't know where this MAC address is yet. When you don't know, you must flood it to all ports to find the destination.",
-      packetIndex: 2,
+      trigger: {
+        type: 'packetCondition',
+        condition: (packet) => {
+          // Show when destination MAC is not in the pre-populated table and not a broadcast
+          // Use constants defined at module level to avoid duplication
+          const knownMacs = [...PRE_POPULATED_MACS, BROADCAST_MAC];
+          return !knownMacs.includes(packet.layer2.dstMAC);
+        }
+      },
       requiresAction: true,
     },
   ],
